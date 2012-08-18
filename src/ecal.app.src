@@ -1,0 +1,7 @@
+{application, ecal, [
+  {description, "Useful calendar functions"},
+  {vsn, git},
+  {registered, []},
+  {applications, [kernel, stdlib, sasl]},
+  {env, []}
+]}.
