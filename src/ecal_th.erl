@@ -17,6 +17,7 @@
 -export([new/3, intersect/2]).
 -include_lib("ecal_th.hrl").
 
+%%% Types
 -export_type([
   threshold_type/0,
   threshold_start/0,
@@ -32,7 +33,11 @@
   threshold_type(), threshold_start(), threshold_end(), threshold_length()
 }.
 
-
+%%% Code Starts here.
+%% @doc Constructs a new time threshold.
+-spec new(
+  Type::threshold_type(), Start::ecal_time:timespec(), Length::integer()
+) -> threshold().
 new(_Type, _Start, 0) ->
   erlang:error(threshold_cant_be_0_length);
 
@@ -52,6 +57,10 @@ new(_Type, _Start, _Length) ->
 %%%          11111
 %%%               22222
 %%%-----------------------------------------------------------------------------
+
+%% @doc Intersects 2 thresholds, returning false if they dont intersect, or
+%% a new threshold if they do, with their intersection information.
+-spec intersect(Th1::threshold(), Th2::threshold()) -> false|threshold().
 intersect(
   #threshold{tend=End1}, #threshold{tstart=Start2}
 ) when End1 =< Start2 ->
@@ -95,12 +104,22 @@ intersect(
   Length = End - Start,
   new(absolute, Start, Length).
 
+%% @doc Chooses the correct end between one of the 2 given intersecting
+%% thresholds.
+-spec choose_end(
+  End1::ecal_time:timespec(), End2::ecal_time:timespec()
+) -> ecal_time:timespec().
 choose_end(End1, End2) when End1 =< End2 ->
   End1;
 
 choose_end(End1, End2) when End2 < End1 ->
   End2.
 
+%% @doc Chooses the correct start between one of the 2 given intersecting
+%% thresholds.
+-spec choose_start(
+  Start1::ecal_time:timespec(), Start2::ecal_time:timespec()
+) -> ecal_time:timespec().
 choose_start(Start1, Start2) when Start1 >= Start2 ->
   Start1;
 
