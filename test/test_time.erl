@@ -158,6 +158,22 @@ can_get_yesterday(_SetupData) ->
   Dt2 = ecal_time:datetime_to_secs({{2011, 12, 31}, {0, 0, 0}}),
   [?_assertEqual(Dt2, ecal_time:yesterday(Dt1))].
 
+can_plus_and_minus_year(_SetupData) ->
+  Dt1 = ecal_time:datetime_to_secs({{2011, 1, 1}, {0, 0, 0}}),
+  Dt2 = ecal_time:datetime_to_secs({{2012, 1, 1}, {0, 0, 0}}),
+  [
+    ?_assertEqual(Dt2, ecal_time:plus_year(Dt1)),
+    ?_assertEqual(Dt1, ecal_time:minus_year(Dt2))
+  ].
+
+can_plus_and_minus_leap_year(_SetupData) ->
+  Dt1 = ecal_time:datetime_to_secs({{2000, 1, 1}, {0, 0, 0}}),
+  Dt2 = ecal_time:datetime_to_secs({{2001, 1, 1}, {0, 0, 0}}),
+  [
+    ?_assertEqual(Dt2, ecal_time:plus_leap_year(Dt1)),
+    ?_assertEqual(Dt1, ecal_time:minus_leap_year(Dt2))
+  ].
+
 simple_test_() ->
   {setup,
     fun start/0,
@@ -180,7 +196,9 @@ simple_test_() ->
         can_get_beginning_of_hour(SetupData),
         can_get_end_of_hour(SetupData),
         can_get_tomorrow(SetupData),
-        can_get_yesterday(SetupData)
+        can_get_yesterday(SetupData),
+        can_plus_and_minus_year(SetupData),
+        can_plus_and_minus_leap_year(SetupData)
       ]}
     end
   }.

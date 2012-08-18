@@ -33,6 +33,7 @@
 -export([plus_minutes/2, minus_minutes/2]).
 -export([plus_hours/2, minus_hours/2]).
 -export([plus_days/2, minus_days/2, yesterday/1, tomorrow/1]).
+-export([plus_year/1, plus_leap_year/1, minus_year/1, minus_leap_year/1]).
 
 %%% Types
 -type timespec():: integer().
@@ -87,6 +88,26 @@ now_to_secs({MegaSecs, Secs, _MicroSecs}) ->
 }) -> timespec().
 datetime_to_secs({{_Year, _Month, _Day}, {_Hour, _Minute, _Second}}=DateTime) ->
   calendar:datetime_to_gregorian_seconds(DateTime).
+
+%% @doc Adds a complete leap year to the given timespec.
+-spec plus_leap_year(Timespec::timespec()) -> timespec().
+plus_leap_year(Timespec) ->
+  plus_days(Timespec, ?DAYS_IN_LEAP_YEAR).
+
+%% @doc Substracts a complete leap year to the given timespec.
+-spec minus_leap_year(Timespec::timespec()) -> timespec().
+minus_leap_year(Timespec) ->
+  minus_days(Timespec, ?DAYS_IN_LEAP_YEAR).
+
+%% @doc Adds a complete year to the given timespec.
+-spec plus_year(Timespec::timespec()) -> timespec().
+plus_year(Timespec) ->
+  plus_days(Timespec, ?DAYS_IN_YEAR).
+
+%% @doc Substracts a complete year to the given timespec.
+-spec minus_year(Timespec::timespec()) -> timespec().
+minus_year(Timespec) ->
+  minus_days(Timespec, ?DAYS_IN_YEAR).
 
 %% @doc Returns the number of complete days in the given timestamp.
 -spec day_of_time(Timespec::timespec()) -> integer().
