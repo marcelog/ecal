@@ -1,30 +1,31 @@
 CWD=$(shell pwd)
 NAME=$(shell basename ${CWD})
+REBAR?=./rebar
 
 all: clean compile edoc release
-	./rebar compile
+	${REBAR} compile
 
 deps:
 	export GIT_SSL_NO_VERIFY=true
-	./rebar get-deps
+	${REBAR} get-deps
 
 edoc:
-	./rebar doc
+	${REBAR} doc
 
 compile:
-	./rebar compile
+	${REBAR} compile
 
 test: compile
-	./rebar eunit skip_deps=true
+	${REBAR} eunit skip_deps=true
 
 release: test
-	(cd rel && ../rebar generate && cd -)
+	(cd rel && .${REBAR} generate && cd -)
 
 node:
-	(cd rel && ../rebar create-node nodeid=${NAME} && cd -)
+	(cd rel && .${REBAR} create-node nodeid=${NAME} && cd -)
 
 clean:
-	./rebar clean
+	${REBAR} clean
 	rm -rf rel/${NAME}
 
 run:
