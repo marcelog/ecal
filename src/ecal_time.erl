@@ -1,6 +1,6 @@
-%%% General calendar functions.
+%%% @doc General calendar functions.
 %%%
-%%% Copyright 2012 Marcelo Gornstein <marcelog@gmail.com>
+%%% Copyright 2012 Marcelo Gornstein &lt;marcelog@gmail.com&gt;
 %%%
 %%% Licensed under the Apache License, Version 2.0 (the "License");
 %%% you may not use this file except in compliance with the License.
@@ -13,6 +13,9 @@
 %%% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
+%%% @end
+%%% @copyright Marcelo Gornstein <marcelog@gmail.com>
+%%% @author Marcelo Gornstein <marcelog@gmail.com>
 -module(ecal_time).
 -author("Marcelo Gornstein <marcelog@gmail.com>").
 -github("https://github.com/marcelog").
