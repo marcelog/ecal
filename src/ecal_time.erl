@@ -22,10 +22,16 @@
 -homepage("http://marcelog.github.com/").
 -license("Apache License 2.0").
 
+-include_lib("eunit/include/eunit.hrl").
+
 %%% Main API
 -export([now/0, is_leapyear/1, datetime_to_secs/1]).
 -export([day_of_time/1]).
+-export([year_of_time/1]).
+-export([plus_years/2, minus_years/2, inc_year/2, dec_year/2]).
+-export([timespec_for_year/1]).
 -export([second_of_day/1, minute_of_day/1, hour_of_day/1]).
+-export([beginning_of_year/1, end_of_year/1]).
 -export([beginning_of_hour/1, end_of_hour/1]).
 -export([beginning_of_day/1, end_of_day/1]).
 -export([beginning_of_minute/1, end_of_minute/1]).
@@ -40,6 +46,7 @@
 -export_type([timespec/0]).
 
 %%% Constants
+-define(GREGORIAN_YEAR_0, 1).
 -define(SECONDS_IN_MINUTE, 60).
 -define(MINUTES_IN_HOUR, 60).
 -define(HOURS_IN_DAY, 24).
@@ -82,12 +89,89 @@ now_to_secs({MegaSecs, Secs, _MicroSecs}) ->
 
 %% @doc Returns the number of seconds since year 1 that the given datetime
 %% represents.
--spec datetime_to_secs({
-  {Year::integer(), Month::integer(), Day::integer()},
-  {Hour::integer(), Minute::integer(), Second::integer()}
-}) -> timespec().
+-spec datetime_to_secs(DateTime::calendar:datetime()) -> timespec().
 datetime_to_secs({{_Year, _Month, _Day}, {_Hour, _Minute, _Second}}=DateTime) ->
   calendar:datetime_to_gregorian_seconds(DateTime).
+
+%% @doc Returns a timespec equal to the first second of the current ongoing
+%% year according to the given timespec (backwards in time).
+-spec beginning_of_year(Timespec::timespec()) -> timespec().
+beginning_of_year(Timespec) ->
+  {Beginning, _Year} = year_of_time(Timespec),
+  Beginning.
+
+%% @doc Returns a timespec equal to the last second of the current ongoing
+%% year according to the given timespec (forward in time).
+-spec end_of_year(Timespec::timespec()) -> timespec().
+end_of_year(Timespec) ->
+  {Beginning, Year} = year_of_time(Timespec),
+  minus_seconds(inc_year(Year, Beginning), 1).
+
+%% @doc Returns the number of the year for the given Timespec.
+-spec year_of_time(Timespec::timespec()) -> integer().
+year_of_time(Timespec) ->
+  year_of_time(Timespec, 0, ?GREGORIAN_YEAR_0).
+
+year_of_time(Timespec, CandidateTs, Year) when Timespec > CandidateTs ->
+  year_of_time(Timespec, inc_year(Year, CandidateTs), Year + 1);
+
+year_of_time(Timespec, CandidateTs, Year) when Timespec =:= CandidateTs ->
+  {CandidateTs, Year};
+
+year_of_time(Timespec, CandidateTs, Year) when Timespec < CandidateTs ->
+  % extra year + year 0
+  {dec_year(Year, CandidateTs), Year - 1 - ?GREGORIAN_YEAR_0}. 
+
+%% @doc Returns the Jan 1st, 00:00:00 for the given year.
+-spec timespec_for_year(Year::integer()) -> timespec().
+timespec_for_year(Year) ->
+  lists:foldl(
+    fun(X, Acc) ->
+      inc_year(X, Acc)
+    end,
+    inc_year(0, 0),
+    lists:seq(1, Year - ?GREGORIAN_YEAR_0)
+  ).
+
+%% @doc Adds the given number of years to the specified time.
+-spec plus_years(Timespec::timespec(), Years::integer()) -> timespec().
+plus_years(Timespec, Years) ->
+  {_Beginning, BaseYear} = year_of_time(Timespec),
+  lists:foldl(
+    fun(X, Acc) ->
+      inc_year(X, Acc)
+    end,
+    Timespec,
+    lists:seq(BaseYear, BaseYear + Years - ?GREGORIAN_YEAR_0)
+  ).
+
+%% @doc Substracts the given number of years to the specified time.
+-spec minus_years(Timespec::timespec(), Years::integer()) -> timespec().
+minus_years(Timespec, Years) ->
+  {_Beginning, BaseYear} = year_of_time(Timespec),
+  lists:foldl(
+    fun(X, Acc) ->
+      dec_year(X, Acc)
+    end,
+    Timespec,
+    lists:seq(BaseYear, BaseYear - Years + ?GREGORIAN_YEAR_0, -1)
+  ).
+
+%% @doc Increments a year, based on if Year is a leap year.
+-spec inc_year(Year::integer(), Timespec::timespec()) -> timespec().
+inc_year(Year, Timespec) ->
+  case is_leapyear(Year) of
+    true -> plus_leap_year(Timespec);
+    false -> plus_year(Timespec)
+  end.
+
+%% @doc Decrements a year, based on if Year is a leap year.
+-spec dec_year(Year::integer(), Timespec::timespec()) -> timespec().
+dec_year(Year, Timespec) ->
+  case is_leapyear(Year - 1) of
+    true -> minus_leap_year(Timespec);
+    false -> minus_year(Timespec)
+  end.
 
 %% @doc Adds a complete leap year to the given timespec.
 -spec plus_leap_year(Timespec::timespec()) -> timespec().

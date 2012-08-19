@@ -62,13 +62,6 @@ can_get_day_of_time(_SetupData) ->
       end
     end,
     0,
-    % Year zero does not exist in the Anno Domini system usually used to number
-    % years in the Gregorian calendar and in its predecessor, the Julian
-    % calendar. In this system, the year 1 BC is followed by AD 1. However,
-    % there is a year zero in astronomical year numbering (where it coincides
-    % with the Julian year 1 BC) and in ISO 8601:2004 (where it coincides
-    % with the Gregorian year 1 BC) as well as in all Buddhist and Hindu
-    % calendars.
     lists:seq(1, Year)
   ),
   Dt1 = ecal_time:datetime_to_secs({{Year, 1, 1}, {1, 2, 3}}),
@@ -174,6 +167,38 @@ can_plus_and_minus_leap_year(_SetupData) ->
     ?_assertEqual(Dt1, ecal_time:minus_leap_year(Dt2))
   ].
 
+can_get_year_of_time(_SetupData) ->
+  Dt1 = ecal_time:datetime_to_secs({{2000, 12, 12}, {12, 12, 12}}),
+  Dt2 = ecal_time:datetime_to_secs({{2000, 1, 1}, {0, 0, 0}}),
+  Result = {Dt2, 2000},
+  [?_assertEqual(Result, ecal_time:year_of_time(Dt1))].
+
+can_get_timespec_for_year(_SetupData) ->
+  Dt1 = ecal_time:datetime_to_secs({{2000, 1, 1}, {0, 0, 0}}),
+  Dt2 = ecal_time:datetime_to_secs({{2001, 1, 1}, {0, 0, 0}}),
+  [
+    ?_assertEqual(Dt1, ecal_time:timespec_for_year(2000)),
+    ?_assertEqual(Dt2, ecal_time:timespec_for_year(2001))
+  ].
+
+can_get_beginning_of_year(_SetupData) ->
+  Dt1 = ecal_time:datetime_to_secs({{2012, 1, 1}, {23, 27, 13}}),
+  Dt2 = ecal_time:datetime_to_secs({{2012, 1, 1}, {0, 00, 00}}),
+  [?_assertEqual(Dt2, ecal_time:beginning_of_year(Dt1))].
+
+can_get_end_of_year(_SetupData) ->
+  Dt1 = ecal_time:datetime_to_secs({{2012, 1, 1}, {23, 19, 55}}),
+  Dt2 = ecal_time:datetime_to_secs({{2012, 12, 31}, {23, 59, 59}}),
+  [?_assertEqual(Dt2, ecal_time:end_of_year(Dt1))].
+
+can_plus_and_minus_years(_SetupData) ->
+  Dt1 = ecal_time:datetime_to_secs({{1600, 1, 1}, {23, 19, 55}}),
+  Dt2 = ecal_time:datetime_to_secs({{1700, 1, 1}, {23, 19, 55}}),
+  [
+    ?_assertEqual(Dt2, ecal_time:plus_years(Dt1, 100)),
+    ?_assertEqual(Dt1, ecal_time:minus_years(Dt2, 100))
+  ].
+
 simple_test_() ->
   {setup,
     fun start/0,
@@ -198,7 +223,12 @@ simple_test_() ->
         can_get_tomorrow(SetupData),
         can_get_yesterday(SetupData),
         can_plus_and_minus_year(SetupData),
-        can_plus_and_minus_leap_year(SetupData)
+        can_plus_and_minus_leap_year(SetupData),
+        can_get_year_of_time(SetupData),
+        can_get_beginning_of_year(SetupData),
+        can_get_end_of_year(SetupData),
+        can_get_timespec_for_year(SetupData),
+        can_plus_and_minus_years(SetupData)
       ]}
     end
   }.
