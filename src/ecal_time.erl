@@ -36,6 +36,7 @@
 -export([beginning_of_hour/1, end_of_hour/1]).
 -export([beginning_of_day/1, end_of_day/1]).
 -export([beginning_of_minute/1, end_of_minute/1]).
+-export([beginning_of_month/1, end_of_month/1]).
 -export([plus_seconds/2, minus_seconds/2]).
 -export([plus_minutes/2, minus_minutes/2]).
 -export([plus_hours/2, minus_hours/2]).
@@ -139,6 +140,21 @@ month_of_time(Timespec, AccTimespec, YearIsLeap, Month)
   month_of_time(
     Timespec, plus_month(AccTimespec, YearIsLeap, Month), YearIsLeap, Month + 1
   ).
+
+%% @doc Returns the 00:00:00 hours of the 1st day of the current month
+%% according to the given timestamp.
+-spec beginning_of_month(Timespec::timespec()) -> timespec().
+beginning_of_month(Timespec) ->
+  {Beginning, _Month} = month_of_time(Timespec),
+  Beginning.
+
+%% @doc Returns the 23:59:59 hours of the last day of the current month
+%% according to the given timestamp.
+-spec end_of_month(Timespec::timespec()) -> timespec().
+end_of_month(Timespec) ->
+  {_YearBeginning, Year} = year_of_time(Timespec),
+  {Beginning, Month} = month_of_time(Timespec),
+  minus_seconds(plus_month(Beginning, is_leapyear(Year), Month), 1).
 
 %% @doc Adds the given month to timespec.
 -spec plus_month(
