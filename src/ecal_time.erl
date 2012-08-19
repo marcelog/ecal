@@ -25,6 +25,7 @@
 %%% Main API
 -export([now/0, is_leapyear/1, datetime_to_secs/1]).
 -export([day_of_time/1]).
+-export([day_of_month/1]).
 -export([year_of_time/1]).
 -export([month_of_time/1]).
 -export([plus_month/3]).
@@ -155,6 +156,12 @@ end_of_month(Timespec) ->
   {_YearBeginning, Year} = year_of_time(Timespec),
   {Beginning, Month} = month_of_time(Timespec),
   minus_seconds(plus_month(Beginning, is_leapyear(Year), Month), 1).
+
+%% @doc Returns the day of the month, starting at 0.
+-spec day_of_month(Timespec::timespec()) -> integer().
+day_of_month(Timespec) ->
+  MonthBeginning = beginning_of_month(Timespec),
+  ((Timespec - MonthBeginning) div ?SECONDS_IN_DAY).
 
 %% @doc Adds the given month to timespec.
 -spec plus_month(

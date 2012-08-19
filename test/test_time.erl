@@ -230,6 +230,14 @@ can_get_end_of_month(_SetupData) ->
   Dt2 = ecal_time:datetime_to_secs({{1600, 2, 29}, {23, 59, 59}}),
   [?_assertEqual(Dt2, ecal_time:end_of_month(Dt1))].
 
+can_get_day_of_month(_SetupData) ->
+  Dt1 = ecal_time:datetime_to_secs({{1600, 2, 1}, {0, 0, 0}}),
+  Dt2 = ecal_time:datetime_to_secs({{1600, 2, 29}, {23, 59, 59}}),
+  [
+    ?_assertEqual(0, ecal_time:day_of_month(Dt1)),
+    ?_assertEqual(28, ecal_time:day_of_month(Dt2))
+  ].
+
 simple_test_() ->
   {setup,
     fun start/0,
@@ -262,7 +270,8 @@ simple_test_() ->
         can_plus_and_minus_years(SetupData),
         can_get_month_of_time(SetupData),
         can_get_beginning_of_month(SetupData),
-        can_get_end_of_month(SetupData)
+        can_get_end_of_month(SetupData),
+        can_get_day_of_month(SetupData)
       ]}
     end
   }.
