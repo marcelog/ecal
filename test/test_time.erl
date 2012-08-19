@@ -247,13 +247,29 @@ can_get_day_of_week(_SetupData) ->
   Dt6 = ecal_time:datetime_to_secs({{1970, 1, 6}, {0, 0, 0}}),
   Dt7 = ecal_time:datetime_to_secs({{1970, 1, 7}, {0, 0, 0}}),
   [
-    ?_assertEqual(4, ecal_time:day_of_week(Dt1)),
-    ?_assertEqual(5, ecal_time:day_of_week(Dt2)),
-    ?_assertEqual(6, ecal_time:day_of_week(Dt3)),
-    ?_assertEqual(0, ecal_time:day_of_week(Dt4)),
-    ?_assertEqual(1, ecal_time:day_of_week(Dt5)),
-    ?_assertEqual(2, ecal_time:day_of_week(Dt6)),
-    ?_assertEqual(3, ecal_time:day_of_week(Dt7))
+    ?_assertEqual(5, ecal_time:day_of_week(Dt1)),
+    ?_assertEqual(6, ecal_time:day_of_week(Dt2)),
+    ?_assertEqual(0, ecal_time:day_of_week(Dt3)),
+    ?_assertEqual(1, ecal_time:day_of_week(Dt4)),
+    ?_assertEqual(2, ecal_time:day_of_week(Dt5)),
+    ?_assertEqual(3, ecal_time:day_of_week(Dt6)),
+    ?_assertEqual(4, ecal_time:day_of_week(Dt7))
+  ].
+
+can_get_beginning_of_week(_SetupData) ->
+  Dt11 = ecal_time:datetime_to_secs({{1970, 1, 3}, {0, 0, 0}}),
+  Dt12 = ecal_time:datetime_to_secs({{1970, 1, 3}, {0, 0, 0}}),
+  [
+    ?_assertEqual(Dt12, ecal_time:beginning_of_week(Dt11)),
+    ?_assertEqual(Dt12, ecal_time:beginning_of_week(Dt12))
+  ].
+
+can_get_end_of_week(_SetupData) ->
+  Dt11 = ecal_time:datetime_to_secs({{1969, 12, 30}, {0, 0, 0}}),
+  Dt12 = ecal_time:datetime_to_secs({{1970, 1, 2}, {23, 59, 59}}),
+  [
+    ?_assertEqual(Dt12, ecal_time:end_of_week(Dt11)),
+    ?_assertEqual(Dt12, ecal_time:end_of_week(Dt12))
   ].
 
 simple_test_() ->
@@ -290,7 +306,9 @@ simple_test_() ->
         can_get_beginning_of_month(SetupData),
         can_get_end_of_month(SetupData),
         can_get_day_of_month(SetupData),
-        can_get_day_of_week(SetupData)
+        can_get_day_of_week(SetupData),
+        can_get_beginning_of_week(SetupData),
+        can_get_end_of_week(SetupData)
       ]}
     end
   }.

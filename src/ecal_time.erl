@@ -39,10 +39,12 @@
 -export([beginning_of_day/1, end_of_day/1]).
 -export([beginning_of_minute/1, end_of_minute/1]).
 -export([beginning_of_month/1, end_of_month/1]).
+-export([beginning_of_week/1, end_of_week/1]).
 -export([plus_seconds/2, minus_seconds/2]).
 -export([plus_minutes/2, minus_minutes/2]).
 -export([plus_hours/2, minus_hours/2]).
 -export([plus_days/2, minus_days/2, yesterday/1, tomorrow/1]).
+-export([plus_weeks/2, minus_weeks/2]).
 -export([plus_year/1, plus_leap_year/1, minus_year/1, minus_leap_year/1]).
 
 %%% Constants
@@ -74,13 +76,13 @@
 -define(SECONDS_IN_WEEK, (?DAYS_IN_WEEK * ?SECONDS_IN_DAY)).
 -define(SECONDS_IN_YEAR, (?DAYS_IN_YEAR * ?SECONDS_IN_DAY)).
 -define(SECONDS_IN_LEAP_YEAR, (?SECONDS_IN_DAY * ?DAYS_IN_LEAP_YEAR)).
--define(DAY_SUN, 0).
--define(DAY_MON, 1).
--define(DAY_TUE, 2).
--define(DAY_WED, 3).
--define(DAY_THU, 4).
--define(DAY_FRI, 5).
--define(DAY_SAT, 6).
+-define(DAY_SUN, 1).
+-define(DAY_MON, 2).
+-define(DAY_TUE, 3).
+-define(DAY_WED, 4).
+-define(DAY_THU, 5).
+-define(DAY_FRI, 6).
+-define(DAY_SAT, 0).
 -define(MONTH_JAN, 0).
 -define(MONTH_FEB, 1).
 -define(MONTH_MAR, 2).
@@ -236,14 +238,22 @@ end_of_year(Timespec) ->
   minus_seconds(inc_year(Year, Beginning), 1).
 
 %% @doc Returns the number of the current day of the week according to the
-%% timespec, starting at sunday (0) up to saturday (6).
+%% timespec, starting at saturday(0) up to friday(6).
 -spec day_of_week(Timespec::timespec()) -> day().
 day_of_week(Timespec) ->
-  DaysLeft1 = Timespec rem ?SECONDS_IN_WEEK,
-  case DaysLeft1 div ?SECONDS_IN_DAY of
-    0 -> 6;
-    Other -> Other - 1
-  end.
+  (Timespec rem ?SECONDS_IN_WEEK) div ?SECONDS_IN_DAY.
+
+%% @doc Returns the 00:00:00hrs of the first day of the week (saturday).
+-spec beginning_of_week(Timespec::timespec()) -> timespec().
+beginning_of_week(Timespec) ->
+  Day = day_of_week(Timespec),
+  BeginDay = beginning_of_day(Timespec),
+  minus_days(BeginDay, Day).
+
+%% @doc Returns the 23:59:59hrs of the last day of the week (friday).
+-spec end_of_week(Timespec::timespec()) -> timespec().
+end_of_week(Timespec) ->
+  minus_seconds(plus_weeks(beginning_of_week(Timespec), 1), 1).
 
 %% @doc Returns the number of the year for the given Timespec.
 -spec year_of_time(Timespec::timespec()) -> integer().
@@ -251,7 +261,7 @@ year_of_time(Timespec) ->
   year_of_time(Timespec, 0, 0).
 
 year_of_time(Timespec, CandidateTs, Year) when Timespec > CandidateTs ->
-year_of_time(Timespec, inc_year(Year, CandidateTs), Year + 1);
+  year_of_time(Timespec, inc_year(Year, CandidateTs), Year + 1);
 
 year_of_time(Timespec, CandidateTs, Year) when Timespec =:= CandidateTs ->
   {CandidateTs, Year};
@@ -407,6 +417,16 @@ beginning_of_hour(Timespec) ->
 -spec end_of_hour(Timespec::timespec()) -> timespec().
 end_of_hour(Timespec) ->
   minus_seconds(plus_hours(beginning_of_hour(Timespec), 1), 1).
+
+%% Adds the given number of weeks to Timespec.
+-spec plus_weeks(Timespec::timespec(), Weeks::integer()) -> timespec().
+plus_weeks(Timespec, Weeks) ->
+  plus_seconds(Timespec, Weeks * ?SECONDS_IN_WEEK).
+
+%% Substracts the given number of weeks from Timespec.
+-spec minus_weeks(Timespec::timespec(), Weeks::integer()) -> timespec().
+minus_weeks(Timespec, Weeks) ->
+  minus_seconds(Timespec, Weeks * ?SECONDS_IN_WEEK).
 
 %% @doc Adds the given number of days to the specified time.
 -spec plus_days(Timespec::timespec(), Hours::integer()) -> timespec().
