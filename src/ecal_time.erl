@@ -22,12 +22,13 @@
 -homepage("http://marcelog.github.com/").
 -license("Apache License 2.0").
 
--include_lib("eunit/include/eunit.hrl").
-
 %%% Main API
 -export([now/0, is_leapyear/1, datetime_to_secs/1]).
 -export([day_of_time/1]).
 -export([year_of_time/1]).
+-export([month_of_time/1]).
+-export([plus_month/3]).
+-export([minus_month/3]).
 -export([plus_years/2, minus_years/2, inc_year/2, dec_year/2]).
 -export([timespec_for_year/1]).
 -export([second_of_day/1, minute_of_day/1, hour_of_day/1]).
@@ -40,10 +41,6 @@
 -export([plus_hours/2, minus_hours/2]).
 -export([plus_days/2, minus_days/2, yesterday/1, tomorrow/1]).
 -export([plus_year/1, plus_leap_year/1, minus_year/1, minus_leap_year/1]).
-
-%%% Types
--type timespec():: integer().
--export_type([timespec/0]).
 
 %%% Constants
 -define(GREGORIAN_YEAR_0, 1).
@@ -73,6 +70,29 @@
 -define(SECONDS_IN_WEEK, (?DAYS_IN_WEEK * ?SECONDS_IN_DAY)).
 -define(SECONDS_IN_YEAR, (?DAYS_IN_YEAR * ?SECONDS_IN_DAY)).
 -define(SECONDS_IN_LEAP_YEAR, (?SECONDS_IN_DAY * ?DAYS_IN_LEAP_YEAR)).
+-define(MONTH_JAN, 0).
+-define(MONTH_FEB, 1).
+-define(MONTH_MAR, 2).
+-define(MONTH_APR, 3).
+-define(MONTH_MAY, 4).
+-define(MONTH_JUN, 5).
+-define(MONTH_JUL, 6).
+-define(MONTH_AUG, 7).
+-define(MONTH_SEP, 8).
+-define(MONTH_OCT, 9).
+-define(MONTH_NOV, 10).
+-define(MONTH_DEC, 11).
+-define(MONTH_FEB_LEAP, feb_leap).
+
+%%% Types
+-type timespec():: integer().
+-type month():: ?MONTH_JAN
+  |?MONTH_FEB|?MONTH_MAR|?MONTH_APR|?MONTH_MAY|?MONTH_JUN
+  |?MONTH_JUL|?MONTH_AUG|?MONTH_SEP|?MONTH_OCT|?MONTH_NOV
+  |?MONTH_DEC|?MONTH_FEB_LEAP.
+
+-export_type([timespec/0]).
+-export_type([month/0]).
 
 %%% Code Starts here.
 
@@ -93,6 +113,81 @@ now_to_secs({MegaSecs, Secs, _MicroSecs}) ->
 datetime_to_secs({{_Year, _Month, _Day}, {_Hour, _Minute, _Second}}=DateTime) ->
   calendar:datetime_to_gregorian_seconds(DateTime).
 
+%% @doc Returns the timespec for the start, and the numeric month, of the
+%% current ongoing year according to the given timestamp, starting at
+%% 0 (january) and up to 11 (december).
+-spec month_of_time(Timespec::timespec()) -> {timespec(), month()}.
+month_of_time(Timespec) ->
+  {Beginning, Year} = year_of_time(Timespec),
+  IsLeap = is_leapyear(Year),
+  month_of_time(Timespec, Beginning, IsLeap, ?MONTH_JAN).
+
+month_of_time(Timespec, AccTimespec, _YearIsLeap, Month)
+  when Timespec =:= AccTimespec ->
+  {AccTimespec, Month};
+
+month_of_time(Timespec, AccTimespec, YearIsLeap, Month)
+  when Timespec < AccTimespec ->
+  {minus_month(AccTimespec, YearIsLeap, Month - 1), Month - 1};
+
+month_of_time(Timespec, AccTimespec, _YearIsLeap, ?MONTH_DEC)
+  when Timespec > AccTimespec ->
+  {AccTimespec, ?MONTH_DEC};
+
+month_of_time(Timespec, AccTimespec, YearIsLeap, Month)
+  when Timespec > AccTimespec ->
+  month_of_time(
+    Timespec, plus_month(AccTimespec, YearIsLeap, Month), YearIsLeap, Month + 1
+  ).
+
+%% @doc Adds the given month to timespec.
+-spec plus_month(
+  Timespec::timespec(), YearIsLeap::boolean(), Month::month()
+) -> timespec().
+plus_month(Timespec, YearIsLeap, Month) ->
+  case Month of
+    ?MONTH_JAN -> plus_days(Timespec, ?DAYS_IN_JAN);
+    ?MONTH_FEB -> case YearIsLeap of
+      true -> plus_days(Timespec, ?DAYS_IN_LEAP_FEB);
+      false -> plus_days(Timespec, ?DAYS_IN_FEB)
+    end;
+    ?MONTH_MAR -> plus_days(Timespec, ?DAYS_IN_MAR);
+    ?MONTH_APR -> plus_days(Timespec, ?DAYS_IN_APR);
+    ?MONTH_MAY -> plus_days(Timespec, ?DAYS_IN_MAY);
+    ?MONTH_JUN -> plus_days(Timespec, ?DAYS_IN_JUN);
+    ?MONTH_JUL -> plus_days(Timespec, ?DAYS_IN_JUL);
+    ?MONTH_AUG -> plus_days(Timespec, ?DAYS_IN_AUG);
+    ?MONTH_SEP -> plus_days(Timespec, ?DAYS_IN_SEP);
+    ?MONTH_OCT -> plus_days(Timespec, ?DAYS_IN_OCT);
+    ?MONTH_NOV -> plus_days(Timespec, ?DAYS_IN_NOV);
+    ?MONTH_DEC -> plus_days(Timespec, ?DAYS_IN_DEC);
+    ?MONTH_FEB_LEAP -> plus_days(Timespec, ?DAYS_IN_LEAP_FEB)
+  end.
+
+%% @doc Substracts the given month to timespec.
+-spec minus_month(
+  Timespec::timespec(), YearIsLeap::boolean(), Month::month()
+) -> timespec().
+minus_month(Timespec, YearIsLeap, Month) ->
+  case Month of
+    ?MONTH_JAN -> minus_days(Timespec, ?DAYS_IN_JAN);
+    ?MONTH_FEB -> case YearIsLeap of
+      true -> minus_days(Timespec, ?DAYS_IN_LEAP_FEB);
+      false -> minus_days(Timespec, ?DAYS_IN_FEB)
+    end;
+    ?MONTH_MAR -> minus_days(Timespec, ?DAYS_IN_MAR);
+    ?MONTH_APR -> minus_days(Timespec, ?DAYS_IN_APR);
+    ?MONTH_MAY -> minus_days(Timespec, ?DAYS_IN_MAY);
+    ?MONTH_JUN -> minus_days(Timespec, ?DAYS_IN_JUN);
+    ?MONTH_JUL -> minus_days(Timespec, ?DAYS_IN_JUL);
+    ?MONTH_AUG -> minus_days(Timespec, ?DAYS_IN_AUG);
+    ?MONTH_SEP -> minus_days(Timespec, ?DAYS_IN_SEP);
+    ?MONTH_OCT -> minus_days(Timespec, ?DAYS_IN_OCT);
+    ?MONTH_NOV -> minus_days(Timespec, ?DAYS_IN_NOV);
+    ?MONTH_DEC -> minus_days(Timespec, ?DAYS_IN_DEC);
+    ?MONTH_FEB_LEAP -> minus_days(Timespec, ?DAYS_IN_LEAP_FEB)
+  end.
+
 %% @doc Returns a timespec equal to the first second of the current ongoing
 %% year according to the given timespec (backwards in time).
 -spec beginning_of_year(Timespec::timespec()) -> timespec().
@@ -110,17 +205,16 @@ end_of_year(Timespec) ->
 %% @doc Returns the number of the year for the given Timespec.
 -spec year_of_time(Timespec::timespec()) -> integer().
 year_of_time(Timespec) ->
-  year_of_time(Timespec, 0, ?GREGORIAN_YEAR_0).
+  year_of_time(Timespec, 0, 0).
 
 year_of_time(Timespec, CandidateTs, Year) when Timespec > CandidateTs ->
-  year_of_time(Timespec, inc_year(Year, CandidateTs), Year + 1);
+year_of_time(Timespec, inc_year(Year, CandidateTs), Year + 1);
 
 year_of_time(Timespec, CandidateTs, Year) when Timespec =:= CandidateTs ->
   {CandidateTs, Year};
 
 year_of_time(Timespec, CandidateTs, Year) when Timespec < CandidateTs ->
-  % extra year + year 0
-  {dec_year(Year, CandidateTs), Year - 1 - ?GREGORIAN_YEAR_0}. 
+  {dec_year(Year, CandidateTs), Year - 1}. 
 
 %% @doc Returns the Jan 1st, 00:00:00 for the given year.
 -spec timespec_for_year(Year::integer()) -> timespec().
@@ -165,7 +259,10 @@ inc_year(Year, Timespec) ->
     false -> plus_year(Timespec)
   end.
 
-%% @doc Decrements a year, based on if Year is a leap year.
+%% @doc Decrements a year, based on if Year is a leap year. This one will
+%% actually substract the PREVIOUS year TO the GIVEN year. So the timespec
+%% resulting from substracting a year to 1999, is 1999 minus the length of
+%% 1998, so, 1/1/1998.
 -spec dec_year(Year::integer(), Timespec::timespec()) -> timespec().
 dec_year(Year, Timespec) ->
   case is_leapyear(Year - 1) of

@@ -182,9 +182,14 @@ can_get_timespec_for_year(_SetupData) ->
   ].
 
 can_get_beginning_of_year(_SetupData) ->
-  Dt1 = ecal_time:datetime_to_secs({{2012, 1, 1}, {23, 27, 13}}),
-  Dt2 = ecal_time:datetime_to_secs({{2012, 1, 1}, {0, 00, 00}}),
-  [?_assertEqual(Dt2, ecal_time:beginning_of_year(Dt1))].
+  Dt1 = ecal_time:datetime_to_secs({{2012, 5, 1}, {0, 0, 0}}),
+  Dt2 = ecal_time:datetime_to_secs({{2012, 12, 31}, {0, 0, 0}}),
+  Dt3 = ecal_time:datetime_to_secs({{2012, 1, 1}, {0, 0, 0}}),
+  [
+    ?_assertEqual(Dt3, ecal_time:beginning_of_year(Dt1)),
+    ?_assertEqual(Dt3, ecal_time:beginning_of_year(Dt2)),
+    ?_assertEqual(Dt3, ecal_time:beginning_of_year(Dt3))
+  ].
 
 can_get_end_of_year(_SetupData) ->
   Dt1 = ecal_time:datetime_to_secs({{2012, 1, 1}, {23, 19, 55}}),
@@ -197,6 +202,22 @@ can_plus_and_minus_years(_SetupData) ->
   [
     ?_assertEqual(Dt2, ecal_time:plus_years(Dt1, 100)),
     ?_assertEqual(Dt1, ecal_time:minus_years(Dt2, 100))
+  ].
+
+can_get_month_of_time(_SetupData) ->
+  Dt11 = ecal_time:datetime_to_secs({{2012, 1, 1}, {23, 19, 55}}),
+  Dt12 = ecal_time:datetime_to_secs({{2012, 1, 1}, {0, 0, 0}}),
+  Dt21 = ecal_time:datetime_to_secs({{2012, 12, 31}, {23, 19, 55}}),
+  Dt22 = ecal_time:datetime_to_secs({{2012, 12, 1}, {0, 0, 0}}),
+  Dt31 = ecal_time:datetime_to_secs({{2012, 1, 1}, {0, 0, 0}}),
+  Dt32 = ecal_time:datetime_to_secs({{2012, 1, 1}, {0, 0, 0}}),
+  Dt41 = ecal_time:datetime_to_secs({{1600, 5, 12}, {12, 12, 12}}),
+  Dt42 = ecal_time:datetime_to_secs({{1600, 5, 1}, {0, 0, 0}}),
+  [
+    ?_assertEqual({Dt12, 0}, ecal_time:month_of_time(Dt11)),
+    ?_assertEqual({Dt22, 11}, ecal_time:month_of_time(Dt21)),
+    ?_assertEqual({Dt32, 0}, ecal_time:month_of_time(Dt31)),
+    ?_assertEqual({Dt42, 4}, ecal_time:month_of_time(Dt41))
   ].
 
 simple_test_() ->
@@ -228,7 +249,8 @@ simple_test_() ->
         can_get_beginning_of_year(SetupData),
         can_get_end_of_year(SetupData),
         can_get_timespec_for_year(SetupData),
-        can_plus_and_minus_years(SetupData)
+        can_plus_and_minus_years(SetupData),
+        can_get_month_of_time(SetupData)
       ]}
     end
   }.
