@@ -26,6 +26,7 @@
 -export([now/0, is_leapyear/1, datetime_to_secs/1]).
 -export([day_of_time/1]).
 -export([day_of_month/1]).
+-export([day_of_week/1]).
 -export([year_of_time/1]).
 -export([month_of_time/1]).
 -export([plus_month/3]).
@@ -54,6 +55,7 @@
 -define(DAYS_IN_LEAP_YEAR, 366).
 -define(DAYS_IN_SHORT_MONTH, 30).
 -define(DAYS_IN_LONG_MONTH, 31).
+-define(SECONDS_TO_UNIX_EPOC, 62167219200).
 -define(DAYS_IN_JAN, ?DAYS_IN_LONG_MONTH).
 -define(DAYS_IN_FEB, 28).
 -define(DAYS_IN_LEAP_FEB, 29).
@@ -72,6 +74,13 @@
 -define(SECONDS_IN_WEEK, (?DAYS_IN_WEEK * ?SECONDS_IN_DAY)).
 -define(SECONDS_IN_YEAR, (?DAYS_IN_YEAR * ?SECONDS_IN_DAY)).
 -define(SECONDS_IN_LEAP_YEAR, (?SECONDS_IN_DAY * ?DAYS_IN_LEAP_YEAR)).
+-define(DAY_SUN, 0).
+-define(DAY_MON, 1).
+-define(DAY_TUE, 2).
+-define(DAY_WED, 3).
+-define(DAY_THU, 4).
+-define(DAY_FRI, 5).
+-define(DAY_SAT, 6).
 -define(MONTH_JAN, 0).
 -define(MONTH_FEB, 1).
 -define(MONTH_MAR, 2).
@@ -92,9 +101,10 @@
   |?MONTH_FEB|?MONTH_MAR|?MONTH_APR|?MONTH_MAY|?MONTH_JUN
   |?MONTH_JUL|?MONTH_AUG|?MONTH_SEP|?MONTH_OCT|?MONTH_NOV
   |?MONTH_DEC|?MONTH_FEB_LEAP.
-
+-type day():: ?DAY_SUN|?DAY_MON|?DAY_TUE|?DAY_WED|?DAY_THU|?DAY_FRI|?DAY_SAT.
 -export_type([timespec/0]).
 -export_type([month/0]).
+-export_type([day/0]).
 
 %%% Code Starts here.
 
@@ -224,6 +234,16 @@ beginning_of_year(Timespec) ->
 end_of_year(Timespec) ->
   {Beginning, Year} = year_of_time(Timespec),
   minus_seconds(inc_year(Year, Beginning), 1).
+
+%% @doc Returns the number of the current day of the week according to the
+%% timespec, starting at sunday (0) up to saturday (6).
+-spec day_of_week(Timespec::timespec()) -> day().
+day_of_week(Timespec) ->
+  DaysLeft1 = Timespec rem ?SECONDS_IN_WEEK,
+  case DaysLeft1 div ?SECONDS_IN_DAY of
+    0 -> 6;
+    Other -> Other - 1
+  end.
 
 %% @doc Returns the number of the year for the given Timespec.
 -spec year_of_time(Timespec::timespec()) -> integer().

@@ -238,6 +238,24 @@ can_get_day_of_month(_SetupData) ->
     ?_assertEqual(28, ecal_time:day_of_month(Dt2))
   ].
 
+can_get_day_of_week(_SetupData) ->
+  Dt1 = ecal_time:datetime_to_secs({{1970, 1, 1}, {0, 0, 0}}),
+  Dt2 = ecal_time:datetime_to_secs({{1970, 1, 2}, {0, 0, 0}}),
+  Dt3 = ecal_time:datetime_to_secs({{1970, 1, 3}, {0, 0, 0}}),
+  Dt4 = ecal_time:datetime_to_secs({{1970, 1, 4}, {0, 0, 0}}),
+  Dt5 = ecal_time:datetime_to_secs({{1970, 1, 5}, {0, 0, 0}}),
+  Dt6 = ecal_time:datetime_to_secs({{1970, 1, 6}, {0, 0, 0}}),
+  Dt7 = ecal_time:datetime_to_secs({{1970, 1, 7}, {0, 0, 0}}),
+  [
+    ?_assertEqual(4, ecal_time:day_of_week(Dt1)),
+    ?_assertEqual(5, ecal_time:day_of_week(Dt2)),
+    ?_assertEqual(6, ecal_time:day_of_week(Dt3)),
+    ?_assertEqual(0, ecal_time:day_of_week(Dt4)),
+    ?_assertEqual(1, ecal_time:day_of_week(Dt5)),
+    ?_assertEqual(2, ecal_time:day_of_week(Dt6)),
+    ?_assertEqual(3, ecal_time:day_of_week(Dt7))
+  ].
+
 simple_test_() ->
   {setup,
     fun start/0,
@@ -271,7 +289,8 @@ simple_test_() ->
         can_get_month_of_time(SetupData),
         can_get_beginning_of_month(SetupData),
         can_get_end_of_month(SetupData),
-        can_get_day_of_month(SetupData)
+        can_get_day_of_month(SetupData),
+        can_get_day_of_week(SetupData)
       ]}
     end
   }.
