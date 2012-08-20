@@ -1,0 +1,48 @@
+-define(GREGORIAN_YEAR_0, 1).
+-define(SECONDS_IN_MINUTE, 60).
+-define(MINUTES_IN_HOUR, 60).
+-define(HOURS_IN_DAY, 24).
+-define(DAYS_IN_WEEK, 7).
+-define(DAYS_IN_YEAR, 365).
+-define(DAYS_IN_LEAP_YEAR, 366).
+-define(DAYS_IN_SHORT_MONTH, 30).
+-define(DAYS_IN_LONG_MONTH, 31).
+-define(SECONDS_TO_UNIX_EPOC, 62167219200).
+-define(DAYS_IN_JAN, ?DAYS_IN_LONG_MONTH).
+-define(DAYS_IN_FEB, 28).
+-define(DAYS_IN_LEAP_FEB, 29).
+-define(DAYS_IN_MAR, ?DAYS_IN_LONG_MONTH).
+-define(DAYS_IN_APR, ?DAYS_IN_SHORT_MONTH).
+-define(DAYS_IN_MAY, ?DAYS_IN_LONG_MONTH).
+-define(DAYS_IN_JUN, ?DAYS_IN_SHORT_MONTH).
+-define(DAYS_IN_JUL, ?DAYS_IN_LONG_MONTH).
+-define(DAYS_IN_AUG, ?DAYS_IN_LONG_MONTH).
+-define(DAYS_IN_SEP, ?DAYS_IN_SHORT_MONTH).
+-define(DAYS_IN_OCT, ?DAYS_IN_LONG_MONTH).
+-define(DAYS_IN_NOV, ?DAYS_IN_SHORT_MONTH).
+-define(DAYS_IN_DEC, ?DAYS_IN_LONG_MONTH).
+-define(SECONDS_IN_HOUR, (?MINUTES_IN_HOUR * ?SECONDS_IN_MINUTE)).
+-define(SECONDS_IN_DAY, (?HOURS_IN_DAY * ?SECONDS_IN_HOUR)).
+-define(SECONDS_IN_WEEK, (?DAYS_IN_WEEK * ?SECONDS_IN_DAY)).
+-define(SECONDS_IN_YEAR, (?DAYS_IN_YEAR * ?SECONDS_IN_DAY)).
+-define(SECONDS_IN_LEAP_YEAR, (?SECONDS_IN_DAY * ?DAYS_IN_LEAP_YEAR)).
+-define(DAY_SUN, 1).
+-define(DAY_MON, 2).
+-define(DAY_TUE, 3).
+-define(DAY_WED, 4).
+-define(DAY_THU, 5).
+-define(DAY_FRI, 6).
+-define(DAY_SAT, 0).
+-define(MONTH_JAN, 0).
+-define(MONTH_FEB, 1).
+-define(MONTH_MAR, 2).
+-define(MONTH_APR, 3).
+-define(MONTH_MAY, 4).
+-define(MONTH_JUN, 5).
+-define(MONTH_JUL, 6).
+-define(MONTH_AUG, 7).
+-define(MONTH_SEP, 8).
+-define(MONTH_OCT, 9).
+-define(MONTH_NOV, 10).
+-define(MONTH_DEC, 11).
+-define(MONTH_FEB_LEAP, feb_leap).

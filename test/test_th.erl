@@ -61,7 +61,7 @@ can_case3(_SetupData) ->
   Th2 = ecal_th:new(absolute, Dt2, 28800),
   ResultDt = ecal_time:datetime_to_secs({{2012, 1, 1}, {8, 0, 0}}),
   Result = ecal_th:new(absolute, ResultDt, 28800),
-  [?_assertEqual(Result, ecal_th:intersect(Th1, Th2))].
+  [?_assertEqual([Result], ecal_th:intersect(Th1, Th2))].
 
 can_case4(_SetupData) ->
   Dt2 = ecal_time:datetime_to_secs({{2012, 1, 1}, {0, 0, 0}}),
@@ -70,7 +70,7 @@ can_case4(_SetupData) ->
   Th2 = ecal_th:new(absolute, Dt2, 86400),
   ResultDt = ecal_time:datetime_to_secs({{2012, 1, 1}, {8, 0, 0}}),
   Result = ecal_th:new(absolute, ResultDt, 28800),
-  [?_assertEqual(Result, ecal_th:intersect(Th1, Th2))].
+  [?_assertEqual([Result], ecal_th:intersect(Th1, Th2))].
 
 can_case5(_SetupData) ->
   Dt1 = ecal_time:datetime_to_secs({{2012, 1, 1}, {0, 0, 0}}),
@@ -79,7 +79,7 @@ can_case5(_SetupData) ->
   Th2 = ecal_th:new(absolute, Dt2, 86400),
   ResultDt = ecal_time:datetime_to_secs({{2012, 1, 1}, {0, 0, 0}}),
   Result = ecal_th:new(absolute, ResultDt, 28800),
-  [?_assertEqual(Result, ecal_th:intersect(Th1, Th2))].
+  [?_assertEqual([Result], ecal_th:intersect(Th1, Th2))].
 
 can_case6(_SetupData) ->
   Dt1 = ecal_time:datetime_to_secs({{2012, 1, 1}, {16, 0, 0}}),
@@ -88,7 +88,61 @@ can_case6(_SetupData) ->
   Th2 = ecal_th:new(absolute, Dt2, 86400),
   ResultDt = ecal_time:datetime_to_secs({{2012, 1, 1}, {16, 0, 0}}),
   Result = ecal_th:new(absolute, ResultDt, 28800),
-  [?_assertEqual(Result, ecal_th:intersect(Th1, Th2))].
+  [?_assertEqual([Result], ecal_th:intersect(Th1, Th2))].
+
+can_intersect_seconds_of_the_day(_SetupData) ->
+  SoD = ecal_th:new_second_of_day(28800, 18000),
+  %% Test1
+  Th1 = ecal_th:new_absolute(
+    ecal_time:datetime_to_secs({{2012, 1, 1}, {0, 0, 0}}),
+    86400
+  ),
+  %% Test2
+  Th2 = ecal_th:new_absolute(
+    ecal_time:datetime_to_secs({{2012, 1, 1}, {0, 0, 0}}),
+    604800
+  ),
+  %% Test3
+  Th3 = ecal_th:new_absolute(
+    ecal_time:datetime_to_secs({{2012, 1, 1}, {7, 59, 0}}),
+    120
+  ),
+  [
+    ?_assertEqual(
+      [ecal_th:new_absolute(
+        ecal_time:datetime_to_secs({{2012, 1, 1}, {8, 0, 0}}), 18000
+      )], ecal_th:intersect(SoD, Th1)
+    ),
+    ?_assertEqual([
+      ecal_th:new_absolute(
+        ecal_time:datetime_to_secs({{2012, 1, 7}, {8, 0, 0}}), 18000
+      ),
+      ecal_th:new_absolute(
+        ecal_time:datetime_to_secs({{2012, 1, 6}, {8, 0, 0}}), 18000
+      ),
+      ecal_th:new_absolute(
+        ecal_time:datetime_to_secs({{2012, 1, 5}, {8, 0, 0}}), 18000
+      ),
+      ecal_th:new_absolute(
+        ecal_time:datetime_to_secs({{2012, 1, 4}, {8, 0, 0}}), 18000
+      ),
+      ecal_th:new_absolute(
+        ecal_time:datetime_to_secs({{2012, 1, 3}, {8, 0, 0}}), 18000
+      ),
+      ecal_th:new_absolute(
+        ecal_time:datetime_to_secs({{2012, 1, 2}, {8, 0, 0}}), 18000
+      ),
+      ecal_th:new_absolute(
+        ecal_time:datetime_to_secs({{2012, 1, 1}, {8, 0, 0}}), 18000
+      )
+    ], ecal_th:intersect(SoD, Th2)
+    ),
+    ?_assertEqual(
+      [ecal_th:new_absolute(
+        ecal_time:datetime_to_secs({{2012, 1, 1}, {8, 0, 0}}), 60
+      )], ecal_th:intersect(SoD, Th3)
+    )
+  ].
 
 simple_test_() ->
   {setup,
@@ -104,7 +158,8 @@ simple_test_() ->
         can_case3(SetupData),
         can_case4(SetupData),
         can_case5(SetupData),
-        can_case6(SetupData)
+        can_case6(SetupData),
+        can_intersect_seconds_of_the_day(SetupData)
       ]}
     end
   }.
