@@ -66,10 +66,10 @@
 %% @doc Returns the number of seconds since year 1 up to now.
 -spec now() -> timespec().
 now() ->
-  now_to_secs(erlang:now()).
+  now_to_secs(os:timestamp()).
 
 %% @doc Returns the number of seconds that the given date represents (normally
-%% the output of erlang:now/0.
+%% the output of os:timestamp/0.
 -spec now_to_secs(Timestamp::erlang:timestamp()) -> timespec().
 now_to_secs({MegaSecs, Secs, _MicroSecs}) ->
   MegaSecs * 1000000 + Secs.
